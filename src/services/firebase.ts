@@ -1,8 +1,8 @@
+import ReactNativeAsyncStorage from '@react-native-async-storage/async-storage';
 import Constants from 'expo-constants';
 import { initializeApp } from 'firebase/app';
-import { getAuth } from 'firebase/auth';
+import { getAuth, initializeAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
-//import ReactNativeAsyncStorage from '@react-native-async-storage/async-storage';
 
 const firebaseConfig = {
   apiKey: Constants.expoConfig?.extra?.firebaseApiKey,
@@ -13,7 +13,30 @@ const firebaseConfig = {
 // Iniciar Firebase
 export const app = initializeApp(firebaseConfig);
 
-export const auth = getAuth(app);
+// Iniciar Auth com persistência AsyncStorage
+let auth;
+try {
+  // getReactNativePersistence existe no runtime do Firebase v12 para React Native
+  // mas pode não estar nos tipos do TypeScript. Usamos require para acessá-lo.
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const firebaseAuth = require('firebase/auth') as typeof import('firebase/auth') & {
+    getReactNativePersistence: (storage: typeof ReactNativeAsyncStorage) => any;
+  };
+  const getReactNativePersistence = firebaseAuth.getReactNativePersistence;
+  
+  auth = initializeAuth(app, {
+    persistence: getReactNativePersistence(ReactNativeAsyncStorage),
+  });
+} catch (error: any) {
+  // Se já foi inicializado, usa getAuth
+  if (error.code === 'auth/already-initialized') {
+    auth = getAuth(app);
+  } else {
+    // Fallback: usa getAuth que no React Native já tem persistência por padrão
+    auth = getAuth(app);
+  }
+}
+export { auth };
 
 // Iniciar firestore
 export const db = getFirestore(app);

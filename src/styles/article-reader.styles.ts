@@ -43,7 +43,7 @@ export const styles = StyleSheet.create({
     categoryBadge: {
       alignSelf: 'flex-start',
       marginBottom: tokens.spacing.md,
-      backgroundColor: tokens.colors.primary + '15',
+      backgroundColor: tokens.colors.primary,
       borderWidth: 0,
     },
     title: {

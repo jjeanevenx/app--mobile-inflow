@@ -1,0 +1,1 @@
+export type CategoryType = 'Todas' | 'Tecnologia' | 'Negócios' | 'Design';

@@ -156,7 +156,7 @@ export default function HomeScreen() {
 
             <TouchableOpacity
               style={styles.quickAccessCard}
-              onPress={() => router.push("/(screens)/learn")}
+              onPress={() => router.push("/(screens)/learning-paths")}
             >
               <View style={styles.quickAccessIconContainer}>
                 <Map size={24} color={tokens.colors.primary} />

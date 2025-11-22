@@ -1,6 +1,7 @@
 import { FadeIn } from '@/src/components/animated';
 import { Badge, Card, CardContent } from '@/src/components/ui';
 import { tokens } from '@/src/constants/tokens';
+import { Article } from '@/src/models/Article';
 import { styles } from '@/src/styles/article-reader.styles';
 import { extractDomain, isValidUrl } from '@/src/utils/media-utils';
 import * as Haptics from 'expo-haptics';
@@ -9,18 +10,21 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { ArrowLeft, CheckCircle, Clock, ExternalLink, ThumbsDown, ThumbsUp } from 'lucide-react-native';
 import React, { useState } from 'react';
 import {
-    Alert,
-    Linking,
-    ScrollView,
-    StatusBar,
-    Text,
-    TouchableOpacity,
-    View
+  Alert,
+  Linking,
+  ScrollView,
+  StatusBar,
+  Text,
+  TouchableOpacity,
+  View
 } from 'react-native';
+
+
 
 export default function ArticleReaderScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
+
   
   // Parse article data from params
   const article = {
@@ -28,11 +32,12 @@ export default function ArticleReaderScreen() {
     title: params.title as string || '',
     author: params.author as string || '',
     duration: params.duration as string || '',
+    timeAgo: params.timeAgo as string || '',
     category: params.category as string || '',
     image: params.image as string || '',
-    content: params.content as string || '',
-    articleUrl: params.articleUrl as string || '', // URL real do artigo
-  };
+    description: params.description as string || '',
+    articleUrl: params.articleUrl as string || ''
+  } as Article;
 
   const [liked, setLiked] = useState<boolean | null>(null);
   const [completed, setCompleted] = useState(false);
@@ -91,7 +96,7 @@ export default function ArticleReaderScreen() {
           </TouchableOpacity>
           <View style={styles.durationContainer}>
             <Clock size={18} color={tokens.colors.mutedForeground} />
-            <Text style={styles.durationText}>{article.duration}</Text>
+            <Text style={styles.durationText}>{article.timeAgo}</Text>
           </View>
         </View>
       </FadeIn>
@@ -125,6 +130,11 @@ export default function ArticleReaderScreen() {
                   transition={300}
                 />
               </View>
+               {/* Article Preview/Summary */}
+               <View style={styles.summarySection}>
+                <Text style={styles.summaryTitle}>Descrição</Text>
+                <Text style={styles.articleContent}>{article.description}</Text>
+              </View>
 
               {/* External Article Notice */}
               <Card style={styles.externalArticleCard}>
@@ -132,9 +142,9 @@ export default function ArticleReaderScreen() {
                   <View style={styles.externalIconContainer}>
                     <ExternalLink size={24} color={tokens.colors.primary} />
                   </View>
-                  <Text style={styles.externalArticleTitle}>Artigo Externo</Text>
+                  <Text style={styles.externalArticleTitle}>Ler a versão completa no site</Text>
                   <Text style={styles.externalArticleDescription}>
-                    Este conteúdo está hospedado em <Text style={styles.externalArticleDomain}>{extractDomain(article.articleUrl)}</Text>
+                    <Text style={styles.externalArticleDomain}>{extractDomain(article.articleUrl)}</Text>
                   </Text>
                   <TouchableOpacity
                     style={styles.openExternalButton}
@@ -149,12 +159,6 @@ export default function ArticleReaderScreen() {
                   </Text>
                 </CardContent>
               </Card>
-
-              {/* Article Preview/Summary */}
-              <View style={styles.summarySection}>
-                <Text style={styles.summaryTitle}>Sobre este artigo</Text>
-                <Text style={styles.articleContent}>{article.content}</Text>
-              </View>
 
               {/* Interaction Section */}
               <Card style={styles.interactionCard}>
@@ -277,10 +281,6 @@ export default function ArticleReaderScreen() {
                   transition={300}
                 />
               </View>
-
-              {/* Article Content */}
-              <Text style={styles.articleContent}>{article.content}</Text>
-
               {/* Interaction Section */}
               <Card style={styles.interactionCard}>
                 <CardContent style={styles.interactionContent}>
