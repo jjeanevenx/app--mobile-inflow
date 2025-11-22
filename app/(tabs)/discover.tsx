@@ -257,7 +257,13 @@ export default function DiscoverScreen() {
                     {category.name}
                   </Text>
                 </View>
-                <TouchableOpacity style={styles.viewAllButton}>
+                <TouchableOpacity style={styles.viewAllButton}
+                onPress={() => router.push({
+                  pathname: '/(screens)/category-content',
+                  params: { categoryId: category.id },
+                })}
+                activeOpacity={0.7}
+                >
                   <Text style={styles.viewAllText}>
                     Ver todos
                   </Text>

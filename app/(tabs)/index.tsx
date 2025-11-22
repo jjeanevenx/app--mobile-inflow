@@ -4,7 +4,6 @@ import {
   Card,
   Progress
 } from "@/src/components/ui";
-import { images } from "@/src/constants/images";
 import { tokens } from "@/src/constants/tokens";
 import { useAuth } from "@/src/hooks/useAuth";
 import { Image } from "expo-image";
@@ -24,69 +23,24 @@ import {
 } from "lucide-react-native";
 import React from "react";
 import {
-  Dimensions,
   ScrollView,
   StatusBar,
-  StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-const { width } = Dimensions.get("window");
+import {
+  CONTINUE_WATCHING,
+  FEATURED_CATEGORIES,
+  FEATURED_CONTENT,
+} from "@/src/mocks/HomeScreen.mock";
 
-// Mock Data - Continue de onde parou
-const CONTINUE_WATCHING = [
-  {
-    id: "1",
-    title: "Inteligência Artificial para Negócios",
-    author: "Dr. Ana Paula Santos",
-    progress: 65,
-    duration: "45 min",
-    image: images.business,
-    type: "Vídeo",
-    category: "Negócios",
-    content:
-      "Aprenda como a Inteligência Artificial está transformando o mundo dos negócios.",
-    videoUrl: "https://www.youtube.com/watch?v=aircAruvnKk",
-  },
-  {
-    id: "2",
-    title: "Blockchain e Web3",
-    author: "Prof. Ricardo Lima",
-    progress: 40,
-    duration: "1h 15min",
-    image: images.blockchain,
-    type: "Artigo",
-    category: "Tecnologia",
-    content: "Explore os fundamentos da tecnologia blockchain.",
-    articleUrl: "https://www.cnnbrasil.com.br/tecnologia/",
-  },
-];
+import { styles } from '@/src/styles/homeScreen.styles';
 
-// Mock Data - Conteúdo Destacado (categorias)
-const FEATURED_CATEGORIES = [
-  { id: "1", name: "Todos", active: true },
-  { id: "2", name: "Tecnologia", active: false },
-  { id: "3", name: "Negócios", active: false },
-  { id: "4", name: "Design", active: false },
-];
 
-const FEATURED_CONTENT = [
-  {
-    id: "1",
-    title: "IA Generativa: Fundamentos",
-    category: "Tecnologia",
-    image: images.ai,
-  },
-  {
-    id: "2",
-    title: "Liderança Moderna",
-    category: "Negócios",
-    image: images.business,
-  },
-];
+
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -154,8 +108,8 @@ export default function HomeScreen() {
           <View style={styles.topBar}>
             <View style={styles.greetingContainer}>
               <Text style={styles.greetingText}>
-                Olá,{"\n"}
-                {user?.displayName || "Usuário Google"}!
+                Oi{"\n"}
+                {user?.displayName || ""}
               </Text>
             </View>
 
@@ -169,7 +123,7 @@ export default function HomeScreen() {
 
               <TouchableOpacity
                 style={styles.iconButton}
-                onPress={() => router.push("/(tabs)/profile")}
+                onPress={() => router.push("/(screens)/settings")}
               >
                 <Settings size={24} color="#fff" />
               </TouchableOpacity>
@@ -187,7 +141,7 @@ export default function HomeScreen() {
           <View style={styles.quickAccessContainer}>
             <TouchableOpacity
               style={styles.quickAccessCard}
-              onPress={() => router.push("/(tabs)/discover")}
+              onPress={() => router.push("/(screens)/news")}
             >
               <View style={styles.quickAccessIconContainer}>
                 <Newspaper
@@ -253,7 +207,10 @@ export default function HomeScreen() {
                   Retome a leitura de onde parou
                 </Text>
               </View>
-              <TouchableOpacity style={styles.seeAllButton}>
+              <TouchableOpacity style={styles.seeAllButton}
+                onPress={() => router.push('/(screens)/continue-watching')}
+                  activeOpacity={0.7}
+              >
                 <Text style={styles.seeAllText}>Ver todos</Text>
                 <ChevronRight
                   size={16}
@@ -379,7 +336,11 @@ export default function HomeScreen() {
                   Explore por categoria
                 </Text>
               </View>
-              <TouchableOpacity style={styles.seeAllButton}>
+              <TouchableOpacity
+                style={styles.seeAllButton}
+                onPress={() => router.push('/(screens)/featured-content')}
+                activeOpacity={0.7}
+              >
                 <Text style={styles.seeAllText}>Ver todos</Text>
                 <ChevronRight
                   size={16}
@@ -429,17 +390,47 @@ export default function HomeScreen() {
                     style={styles.featuredCard}
                     activeOpacity={0.7}
                   >
-                    <Image
-                      source={{ uri: item.image }}
-                      style={styles.featuredImage}
-                      contentFit="cover"
-                    />
-                    <Badge
-                      variant="default"
-                      style={styles.categoryBadge}
-                    >
-                      {item.category}
-                    </Badge>
+                    <Card style={styles.featuredCardInner}>
+                      {/* Imagem com badge de categoria */}
+                      <View style={styles.featuredImageContainer}>
+                        <Image
+                          source={{ uri: item.image }}
+                          style={styles.featuredImage}
+                          contentFit="cover"
+                        />
+                        <Badge
+                          variant="default"
+                          style={styles.categoryBadge}
+                        >
+                          {item.category}
+                        </Badge>
+                      </View>
+
+                      {/* Informações do card */}
+                      <View style={styles.featuredInfo}>
+                        <Text
+                          style={styles.featuredTitle}
+                          numberOfLines={2}
+                        >
+                          {item.title}
+                        </Text>
+                        <Text
+                          style={styles.featuredAuthor}
+                          numberOfLines={1}
+                        >
+                          {item.author}
+                        </Text>
+                        <View style={styles.featuredDuration}>
+                          <Clock
+                            size={12}
+                            color={tokens.colors.mutedForeground}
+                          />
+                          <Text style={styles.featuredDurationText}>
+                            {item.duration}
+                          </Text>
+                        </View>
+                      </View>
+                    </Card>
                   </TouchableOpacity>
                 </FadeIn>
               ))}
@@ -454,259 +445,3 @@ export default function HomeScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: tokens.colors.background,
-  },
-  headerGradient: {
-    paddingTop: 48,
-    paddingHorizontal: tokens.spacing.lg,
-    paddingBottom: tokens.spacing.lg,
-    borderBottomLeftRadius: 32,
-    borderBottomRightRadius: 32,
-  },
-  topBar: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
-    marginBottom: tokens.spacing["2xl"],
-  },
-  greetingContainer: {
-    flex: 1,
-  },
-  greetingText: {
-    fontSize: 24,
-    fontWeight: "400",
-    color: "#fff",
-    lineHeight: 32,
-  },
-  headerIcons: {
-    flexDirection: "row",
-    gap: tokens.spacing.md,
-    alignItems: "center",
-  },
-  iconButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    alignItems: "center",
-    justifyContent: "center",
-    position: "relative",
-  },
-  notificationDot: {
-    position: "absolute",
-    top: 4,
-    right: 4,
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    backgroundColor: "#FB2C36",
-    borderWidth: 1.333,
-    borderColor: "#fff",
-  },
-  quickAccessContainer: {
-    flexDirection: "row",
-    gap: tokens.spacing.md,
-    justifyContent: "space-between",
-  },
-  quickAccessCard: {
-    flex: 1,
-    backgroundColor: "#fff",
-    borderRadius: 16,
-    paddingVertical: 20,
-    paddingHorizontal: 0,
-    alignItems: "center",
-    gap: tokens.spacing.sm,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.1,
-    shadowRadius: 15,
-    elevation: 5,
-    minHeight: 131,
-  },
-  quickAccessIconContainer: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  quickAccessLabel: {
-    fontSize: 14,
-    fontWeight: "400",
-    color: tokens.colors.foreground,
-    textAlign: "center",
-    lineHeight: 17.5,
-  },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
-    paddingTop: tokens.spacing.xl,
-    paddingBottom: tokens.spacing["2xl"],
-  },
-  section: {
-    marginBottom: tokens.spacing["2xl"],
-  },
-  sectionHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
-    paddingHorizontal: tokens.spacing.lg,
-    marginBottom: tokens.spacing.lg,
-  },
-  sectionTitle: {
-    fontSize: 20,
-    fontWeight: "400",
-    color: tokens.colors.foreground,
-    marginBottom: 4,
-    lineHeight: 28,
-  },
-  sectionSubtitle: {
-    fontSize: 14,
-    fontWeight: "400",
-    color: tokens.colors.mutedForeground,
-    lineHeight: 20,
-  },
-  seeAllButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-  },
-  seeAllText: {
-    fontSize: 14,
-    fontWeight: "400",
-    color: tokens.colors.primary,
-  },
-  horizontalScroll: {
-    paddingHorizontal: tokens.spacing.lg,
-    gap: tokens.spacing.md,
-  },
-  continueCard: {
-    width: 320,
-  },
-  continueCardInner: {
-    backgroundColor: "#fff",
-    borderRadius: 14,
-    overflow: "hidden",
-  },
-  continueCardContent: {
-    flexDirection: "row",
-    padding: 16,
-    gap: 16,
-  },
-  thumbnailContainer: {
-    width: 96,
-    height: 128,
-    borderRadius: 14,
-    overflow: "hidden",
-    position: "relative",
-  },
-  thumbnail: {
-    width: "100%",
-    height: "100%",
-  },
-  progressBadge: {
-    position: "absolute",
-    top: 8,
-    left: 8,
-    backgroundColor: "#F0B100",
-    borderWidth: 0,
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-  },
-  continueInfo: {
-    flex: 1,
-    paddingTop: 4,
-    gap: tokens.spacing.sm,
-  },
-  typeBadgeContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: tokens.spacing.xs,
-  },
-  typeBadgeText: {
-    fontSize: 14,
-    fontWeight: "400",
-    color: tokens.colors.primary,
-  },
-  continueTitle: {
-    fontSize: 16,
-    fontWeight: "400",
-    color: tokens.colors.foreground,
-    lineHeight: 20,
-  },
-  continueAuthor: {
-    fontSize: 12,
-    fontWeight: "400",
-    color: tokens.colors.mutedForeground,
-    lineHeight: 16,
-  },
-  durationContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-  },
-  durationText: {
-    fontSize: 12,
-    fontWeight: "400",
-    color: tokens.colors.mutedForeground,
-  },
-  progressBarContainer: {
-    height: 6,
-  },
-  progressBar: {
-    height: 6,
-    borderRadius: 0,
-  },
-  categoryScroll: {
-    paddingHorizontal: tokens.spacing.lg,
-    gap: tokens.spacing.md,
-    marginBottom: tokens.spacing.lg,
-  },
-  categoryPill: {
-    paddingHorizontal: tokens.spacing.lg,
-    paddingVertical: tokens.spacing.sm,
-    borderRadius: 20,
-    backgroundColor: tokens.colors.muted,
-  },
-  categoryPillActive: {
-    backgroundColor: tokens.colors.primary,
-  },
-  categoryPillText: {
-    fontSize: 14,
-    fontWeight: "500",
-    color: tokens.colors.mutedForeground,
-  },
-  categoryPillTextActive: {
-    color: "#fff",
-  },
-  featuredGrid: {
-    flexDirection: "row",
-    paddingHorizontal: tokens.spacing.lg,
-    gap: tokens.spacing.md,
-  },
-  featuredCard: {
-    width:
-      (width - tokens.spacing.lg * 2 - tokens.spacing.md) / 2,
-    aspectRatio: 1,
-    borderRadius: 14,
-    overflow: "hidden",
-    position: "relative",
-  },
-  featuredImage: {
-    width: "100%",
-    height: "100%",
-  },
-  categoryBadge: {
-    position: "absolute",
-    top: 12,
-    left: 12,
-    backgroundColor: tokens.colors.primary + "90",
-    borderWidth: 0,
-  },
-  bottomSpacer: {
-    height: tokens.spacing["2xl"],
-  },
-});

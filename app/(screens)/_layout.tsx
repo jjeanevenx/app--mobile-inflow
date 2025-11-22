@@ -4,8 +4,7 @@ export default function ScreensLayout() {
   return (
     <Stack
       screenOptions={{
-        headerShown: true,
-        //headerBackTitleVisible: false,
+        headerShown: false,
         headerTitleStyle: {
           fontWeight: '600',
         },
