@@ -1,6 +1,6 @@
+import { colors } from '@/src/constants/colors';
 import React from 'react';
-import { View, Text, StyleSheet, ViewStyle, TextStyle } from 'react-native';
-import { colors } from '@/src/utils/colors';
+import { StyleSheet, Text, TextStyle, View, ViewStyle } from 'react-native';
 
 type BadgeVariant = 'default' | 'secondary' | 'destructive' | 'outline' | 'success';
 
