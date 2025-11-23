@@ -1,6 +1,7 @@
 import { Card, Progress } from '@//src/components/ui';
 import { FadeIn } from '@/src/components/animated';
 import { tokens } from '@/src/constants/tokens';
+import { Video } from '@/src/models/Video';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
@@ -43,17 +44,27 @@ export default function ContinueWatchingScreen() {
 
   const handleContentClick = (item: any) => {
     if (item.type === 'Vídeo') {
+      const video: Omit<Video, 'id'> & { id: string | number } = {
+        id: item.id,
+        title: item.title,
+        author: item.author,
+        duration: item.duration,
+        category: item.category,
+        image: item.image,
+        description: item.content || '',
+        videoUrl: item.videoUrl || '',
+      };
       router.push({
         pathname: '/(screens)/video-player',
         params: {
-          id: item.id,
-          title: item.title,
-          author: item.author,
-          duration: item.duration,
-          category: item.category,
-          image: item.image,
-          description: item.content,
-          videoUrl: item.videoUrl || '',
+          id: String(video.id),
+          title: video.title,
+          author: video.author,
+          duration: video.duration,
+          category: video.category,
+          image: video.image,
+          description: video.description,
+          videoUrl: video.videoUrl,
         },
       });
     } else {

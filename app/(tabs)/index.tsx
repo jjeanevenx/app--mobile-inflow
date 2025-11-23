@@ -6,6 +6,7 @@ import {
 } from "@/src/components/ui";
 import { tokens } from "@/src/constants/tokens";
 import { useAuth } from "@/src/hooks/useAuth";
+import { Video } from "@/src/models/Video";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
@@ -49,17 +50,17 @@ export default function HomeScreen() {
   const [selectedCategory, setSelectedCategory] =
     React.useState("1");
 
-  const handleNavigateToVideo = (item: any) => {
+  const handleNavigateToVideo = (item: Omit<Video, 'id'> & { id: string | number }) => {
     router.push({
       pathname: "/(screens)/video-player",
       params: {
-        id: item.id,
+        id: String(item.id),
         title: item.title,
         author: item.author,
         duration: item.duration,
         category: item.category,
         image: item.image,
-        description: item.content,
+        description: item.description || (item as any).content || '',
         videoUrl: item.videoUrl || "",
       },
     });

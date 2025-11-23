@@ -1,6 +1,7 @@
 import { FadeIn } from '@/src/components/animated';
 import { Badge, Card, CardContent } from '@/src/components/ui';
 import { tokens } from '@/src/constants/tokens';
+import { Video } from '@/src/models/Video';
 import { styles } from '@/src/styles/Featured-content.styles';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -32,16 +33,27 @@ export default function FeaturedContentScreen() {
 
   const handleCardPress = (item: typeof ALL_FEATURED_CONTENT[0]) => {
     if (item.type === 'video') {
+      const video: Omit<Video, 'id'> & { id: string | number } = {
+        id: item.id,
+        title: item.title,
+        author: item.author,
+        duration: item.duration,
+        category: item.category,
+        image: item.image,
+        description: 'Este é um vídeo completo sobre ' + item.title + '. Aprenda com especialistas e desenvolva suas habilidades de forma prática e envolvente.',
+        videoUrl: (item as any).videoUrl || '',
+      };
       router.push({
         pathname: '/(screens)/video-player',
         params: {
-          id: item.id,
-          title: item.title,
-          author: item.author,
-          duration: item.duration,
-          category: item.category,
-          image: item.image,
-          description: 'Este é um vídeo completo sobre ' + item.title + '. Aprenda com especialistas e desenvolva suas habilidades de forma prática e envolvente.',
+          id: String(video.id),
+          title: video.title,
+          author: video.author,
+          duration: video.duration,
+          category: video.category,
+          image: video.image,
+          description: video.description,
+          videoUrl: video.videoUrl,
         },
       });
     } else {

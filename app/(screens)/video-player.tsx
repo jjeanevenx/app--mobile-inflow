@@ -9,13 +9,14 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { ArrowLeft, CheckCircle, Clock, ExternalLink, ThumbsDown, ThumbsUp } from 'lucide-react-native';
 import React, { useState } from 'react';
 import {
-    ScrollView,
-    StatusBar,
-    Text,
-    TouchableOpacity,
-    View,
+  ScrollView,
+  StatusBar,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 
+import { Video } from '@/src/models/Video';
 import { styles } from '@/src/styles/universalVideoPlayer.styles';
 
 
@@ -24,7 +25,7 @@ export default function VideoPlayerScreen() {
   const params = useLocalSearchParams();
   
   // Parse video data from params
-  const video = {
+  const video: Video = {
     id: Number(params.id) || 0,
     title: params.title as string || '',
     author: params.author as string || '',
@@ -32,7 +33,7 @@ export default function VideoPlayerScreen() {
     category: params.category as string || '',
     image: params.image as string || '',
     description: params.description as string || params.content as string || '',
-    videoUrl: params.videoUrl as string || '', // URL real do vídeo
+    videoUrl: params.videoUrl as string || ''
   };
 
   const [liked, setLiked] = useState<boolean | null>(null);

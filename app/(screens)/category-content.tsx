@@ -2,6 +2,7 @@ import { FadeIn } from '@/src/components/animated';
 import { Badge, Card, CardContent } from '@/src/components/ui';
 import { images } from '@/src/constants/images';
 import { tokens } from '@/src/constants/tokens';
+import { Video } from '@/src/models/Video';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -215,16 +216,27 @@ export default function CategoryContentScreen() {
 
   const handleCardPress = (item: typeof contents[0]) => {
     if (item.type === 'video') {
+      const video: Omit<Video, 'id'> & { id: string | number } = {
+        id: item.id,
+        title: item.title,
+        author: item.author,
+        duration: item.duration,
+        category: item.category,
+        image: item.image,
+        description: `Este é um vídeo completo sobre ${item.title}. ${item.description}`,
+        videoUrl: (item as any).videoUrl || '',
+      };
       router.push({
         pathname: '/(screens)/video-player',
         params: {
-          id: item.id,
-          title: item.title,
-          author: item.author,
-          duration: item.duration,
-          category: item.category,
-          image: item.image,
-          description: `Este é um vídeo completo sobre ${item.title}. ${item.description}`,
+          id: String(video.id),
+          title: video.title,
+          author: video.author,
+          duration: video.duration,
+          category: video.category,
+          image: video.image,
+          description: video.description,
+          videoUrl: video.videoUrl,
         },
       });
     } else {

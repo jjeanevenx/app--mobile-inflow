@@ -1,90 +1,123 @@
-import { colors } from '@/src/utils/colors';
+import { tokens } from '@/src/constants/tokens';
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
-import Svg, { Defs, LinearGradient, Path, Stop } from 'react-native-svg';
+import { View, ViewStyle } from 'react-native';
+import Svg, { Defs, LinearGradient, Path, Rect, Stop } from 'react-native-svg';
 
 interface LogoProps {
-  variant?: 'full' | 'icon' | 'text';
   size?: 'sm' | 'md' | 'lg' | 'xl';
-  showTagline?: boolean;
+  style?: ViewStyle;
+  variant?: 'colorful' | 'white' | 'monochrome';
 }
 
+const SIZES = {
+  sm: 32,
+  md: 48,
+  lg: 80,
+  xl: 120,
+};
+
 export function Logo({ 
-  variant = 'full', 
   size = 'md', 
-  showTagline = false,
+  style, 
+  variant = 'colorful' 
 }: LogoProps) {
-  const dimensions = {
-    sm: { icon: 24, text: 14, tagline: 10 },
-    md: { icon: 32, text: 18, tagline: 12 },
-    lg: { icon: 48, text: 24, tagline: 14 },
-    xl: { icon: 64, text: 32, tagline: 16 },
+  const logoSize = SIZES[size];
+  
+  const getColors = () => {
+    switch (variant) {
+      case 'white':
+        return {
+          background: 'rgba(255, 255, 255, 0.15)',
+          wave: '#ffffff',
+          border: 'rgba(255, 255, 255, 0.3)',
+          borderWidth: 2,
+          useGradient: false,
+        };
+      case 'monochrome':
+        return {
+          background: tokens.colors.muted,
+          wave: tokens.colors.foreground,
+          border: 'transparent',
+          borderWidth: 0,
+          useGradient: false,
+        };
+      case 'colorful':
+      default:
+        return {
+          background: 'transparent', 
+          wave: '#ffffff',
+          border: 'transparent',
+          borderWidth: 0,
+          useGradient: true,
+        };
+    }
   };
 
-  const dim = dimensions[size];
-
-  const LogoIcon = () => (
-    <Svg width={dim.icon} height={dim.icon} viewBox="0 0 32 32" fill="none">
-      <Defs>
-        <LinearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
-          <Stop offset="0%" stopColor={colors.primary} stopOpacity="1" />
-          <Stop offset="100%" stopColor={colors.secondary} stopOpacity="1" />
-        </LinearGradient>
-      </Defs>
-      <Path
-        d="M8 4 L24 4 C26.2 4 28 5.8 28 8 L28 24 C28 26.2 26.2 28 24 28 L8 28 C5.8 28 4 26.2 4 24 L4 8 C4 5.8 5.8 4 8 4 Z"
-        fill="url(#grad1)"
-      />
-      <Path
-        d="M12 10 L12 22 M16 10 L16 22 M20 10 L20 22"
-        stroke="white"
-        strokeWidth="2"
-        strokeLinecap="round"
-      />
-      <Path
-        d="M10 16 L22 16"
-        stroke="white"
-        strokeWidth="2"
-        strokeLinecap="round"
-        opacity="0.5"
-      />
-    </Svg>
-  );
-
-  if (variant === 'icon') {
-    return <LogoIcon />;
-  }
+  const colors = getColors();
 
   return (
-    <View style={styles.container}>
-      {variant === 'full' && <LogoIcon />}
-      <View style={variant === 'full' ? styles.textContainer : undefined}>
-        <Text style={[styles.logoText, { fontSize: dim.text }]}>Inflow</Text>
-        {showTagline && (
-          <Text style={[styles.tagline, { fontSize: dim.tagline }]}>
-            Sempre Relevante
-          </Text>
-        )}
-      </View>
+    <View style={[{ width: logoSize, height: logoSize }, style]}>
+      <Svg
+        width={logoSize}
+        height={logoSize}
+        viewBox="0 0 100 100"
+        style={{ width: '100%', height: '100%' }}
+      >
+        <Defs>
+          <LinearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <Stop offset="0%" stopColor={tokens.colors.primary} stopOpacity="1" />
+            <Stop offset="50%" stopColor="#8b5cf6" stopOpacity="1" />
+            <Stop offset="100%" stopColor="#a855f7" stopOpacity="1" />
+          </LinearGradient>
+        </Defs>
+
+        <Rect
+          x="5"
+          y="5"
+          width="90"
+          height="90"
+          rx="22"
+          fill={colors.useGradient ? 'url(#logoGradient)' : colors.background}
+          stroke={colors.border}
+          strokeWidth={colors.borderWidth}
+        />
+
+        <Path
+          d="M 25 55 Q 35 45, 45 50 T 65 50 Q 70 52, 75 48"
+          stroke={colors.wave}
+          strokeWidth="4.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          fill="none"
+        />
+
+        <Path
+          d="M 25 62 Q 35 52, 45 57 T 65 57 Q 70 59, 75 55"
+          stroke={colors.wave}
+          strokeWidth="3.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          fill="none"
+          opacity="0.6"
+        />
+
+        <Path
+          d="M 25 48 Q 35 38, 45 43 T 65 43 Q 70 45, 75 41"
+          stroke={colors.wave}
+          strokeWidth="2.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          fill="none"
+          opacity="0.4"
+        />
+      </Svg>
     </View>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  textContainer: {
-    marginLeft: 12,
-  },
-  logoText: {
-    fontWeight: '700',
-    color: colors.primary,
-    letterSpacing: -0.5,
-  },
-  tagline: {
-    color: colors.textSecondary,
-    marginTop: 2,
-  },
-});
+// const styles = StyleSheet.create({
+//   container: {
+//     justifyContent: 'center',
+//     alignItems: 'center',
+//   },
+// });

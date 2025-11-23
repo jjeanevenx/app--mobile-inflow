@@ -11,6 +11,7 @@ export default function ScreensLayout() {
       }}
     >
       <Stack.Screen name="news" options={{ title: 'Notícias' }} />
+      <Stack.Screen name="learning-paths" options={{ title: 'Trilhas' }} />
       <Stack.Screen name="journey" options={{ title: 'Minha Jornada' }} />
       <Stack.Screen name="progress" options={{ title: 'Estatísticas' }} />
       <Stack.Screen name="achievements" options={{ title: 'Conquistas' }} />
