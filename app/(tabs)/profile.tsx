@@ -5,10 +5,11 @@ import {
   Edit2,
   Settings,
   Target,
-  TrendingUp
+  TrendingUp,
 } from 'lucide-react-native';
 import React from 'react';
 import {
+  Dimensions,
   ScrollView,
   StatusBar,
   StyleSheet,
@@ -17,41 +18,24 @@ import {
   View,
 } from 'react-native';
 
+const { width } = Dimensions.get('window');
+const CARD_WIDTH = (width - 72) / 3; // (total width - paddings) / 3 cards
+
 export default function ProfileScreen() {
   const router = useRouter();
 
-  const handleEditProfile = () => {
-    // Implementar navegação para editar perfil
-  };
-
-  const handleEditInterests = () => {
-    // Implementar navegação para editar interesses
-  };
-
-  const handleManageGoals = () => {
-    // Implementar navegação para gerenciar metas
-  };
-
-  const handleViewReport = () => {
-    router.push('/(screens)/progress');
-  };
-
-  const handleViewJourney = () => {
-    router.push('/(screens)/journey');
-  };
-
-  const handleViewPaths = () => {
-    router.push('/(tabs)/learn');
-  };
-
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="dark-content" />
+      <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
 
-      {/* Header simples */}
+      {/* Header */}
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Meu Perfil</Text>
-        <TouchableOpacity style={styles.settingsButton}>
+        <TouchableOpacity
+          style={styles.settingsButton}
+          onPress={() => router.push('/(screens)/settings')}
+          activeOpacity={0.7}
+        >
           <Settings size={24} color={tokens.colors.foreground} />
         </TouchableOpacity>
       </View>
@@ -68,18 +52,17 @@ export default function ProfileScreen() {
             <View style={styles.profileInfo}>
               {/* Avatar com iniciais */}
               <View style={styles.avatar}>
-                <Text style={styles.avatarText}>MS</Text>
+                <Text style={styles.avatarText}>JS</Text>
               </View>
               <View style={styles.profileTextContainer}>
-                <Text style={styles.profileName}>Maria Santos</Text>
-                <Text style={styles.profileEmail}>maria.santos@gmail.com</Text>
+                <Text style={styles.profileName}>João Silva</Text>
+                <Text style={styles.profileEmail}>joao.silva@gmail.com</Text>
               </View>
             </View>
 
             {/* Botão Editar Perfil */}
             <TouchableOpacity
               style={styles.editProfileButton}
-              onPress={handleEditProfile}
               activeOpacity={0.8}
             >
               <Edit2 size={16} color={tokens.colors.foreground} />
@@ -129,7 +112,7 @@ export default function ProfileScreen() {
           <View style={styles.interestsCard}>
             <View style={styles.cardHeader}>
               <Text style={styles.cardTitle}>Meus Interesses</Text>
-              <TouchableOpacity onPress={handleEditInterests}>
+              <TouchableOpacity onPress={() => router.push('/(screens)/edit-interests')}>
                 <Text style={styles.editButton}>Editar</Text>
               </TouchableOpacity>
             </View>
@@ -147,7 +130,7 @@ export default function ProfileScreen() {
                 <Target size={20} color={tokens.colors.primary} />
                 <Text style={styles.cardTitle}>Minhas Metas</Text>
               </View>
-              <TouchableOpacity onPress={handleManageGoals}>
+              <TouchableOpacity onPress={() => router.push('/(screens)/manage-goals')}>
                 <Text style={styles.editButton}>Gerenciar</Text>
               </TouchableOpacity>
             </View>
@@ -161,28 +144,24 @@ export default function ProfileScreen() {
         <FadeIn delay={350} duration={400}>
           <View style={styles.actionsCard}>
             <Text style={styles.cardTitle}>Ações Rápidas</Text>
-            
-            {/* Botões de Ação */}
             <View style={styles.actionsContainer}>
               <TouchableOpacity
                 style={styles.actionButton}
-                onPress={handleViewReport}
+                onPress={() => router.push('/(screens)/progress')}
                 activeOpacity={0.8}
               >
                 <Text style={styles.actionButtonText}>Ver Relatório Completo</Text>
               </TouchableOpacity>
-
               <TouchableOpacity
                 style={styles.actionButton}
-                onPress={handleViewJourney}
+                onPress={() => router.push('/(screens)/journey')}
                 activeOpacity={0.8}
               >
                 <Text style={styles.actionButtonText}>Minha Jornada</Text>
               </TouchableOpacity>
-
               <TouchableOpacity
                 style={styles.actionButton}
-                onPress={handleViewPaths}
+                onPress={() => router.push('/(screens)/learning-paths')}
                 activeOpacity={0.8}
               >
                 <Text style={styles.actionButtonText}>Trilhas de Aprendizado</Text>
@@ -191,7 +170,6 @@ export default function ProfileScreen() {
           </View>
         </FadeIn>
 
-        {/* Bottom Spacer */}
         <View style={styles.bottomSpacer} />
       </ScrollView>
     </View>
@@ -201,18 +179,18 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: tokens.colors.background,
+    backgroundColor: '#FFFFFF',
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 24,
-    paddingTop: 16,
+    paddingTop: 48,
     paddingBottom: 16,
-    backgroundColor: tokens.colors.card,
+    backgroundColor: '#FFFFFF',
     borderBottomWidth: 1,
-    borderBottomColor: tokens.colors.border,
+    borderBottomColor: 'rgba(0, 0, 0, 0.1)',
   },
   headerTitle: {
     fontSize: 16,
@@ -221,28 +199,23 @@ const styles = StyleSheet.create({
     lineHeight: 24,
   },
   settingsButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 8,
-    justifyContent: 'center',
-    alignItems: 'center',
+    padding: 0,
   },
   scrollView: {
     flex: 1,
   },
   scrollContent: {
-    paddingTop: 24,
     paddingHorizontal: 24,
-    paddingBottom: 100,
+    paddingTop: 24,
   },
   profileCard: {
-    backgroundColor: tokens.colors.card,
+    backgroundColor: '#FFFFFF',
     borderRadius: 14,
-    padding: 25,
-    marginBottom: 24,
     borderWidth: 1,
-    borderColor: tokens.colors.border,
+    borderColor: 'rgba(0, 0, 0, 0.1)',
+    padding: 25,
     gap: 40,
+    marginBottom: 24,
   },
   profileInfo: {
     flexDirection: 'row',
@@ -252,15 +225,15 @@ const styles = StyleSheet.create({
   avatar: {
     width: 80,
     height: 80,
-    borderRadius: 40,
-    backgroundColor: tokens.colors.primary,
-    justifyContent: 'center',
+    borderRadius: 999,
+    backgroundColor: '#6366F1',
     alignItems: 'center',
+    justifyContent: 'center',
   },
   avatarText: {
     fontSize: 24,
     fontWeight: '400',
-    color: tokens.colors.primaryForeground,
+    color: '#FFFFFF',
     lineHeight: 32,
   },
   profileTextContainer: {
@@ -275,7 +248,8 @@ const styles = StyleSheet.create({
   },
   profileEmail: {
     fontSize: 14,
-    color: tokens.colors.textSecondary,
+    fontWeight: '400',
+    color: '#717182',
     lineHeight: 20,
   },
   editProfileButton: {
@@ -283,11 +257,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
-    height: 36,
-    backgroundColor: tokens.colors.card,
+    backgroundColor: '#FFFFFF',
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: tokens.colors.border,
+    borderColor: 'rgba(0, 0, 0, 0.1)',
+    paddingVertical: 8,
+    height: 36,
   },
   editProfileText: {
     fontSize: 14,
@@ -297,38 +272,39 @@ const styles = StyleSheet.create({
   },
   statsContainer: {
     flexDirection: 'row',
-    gap: 12,
+    justifyContent: 'space-between',
     marginBottom: 24,
+    gap: 12,
   },
   statCard: {
     flex: 1,
-    backgroundColor: tokens.colors.card,
+    backgroundColor: '#FFFFFF',
     borderRadius: 14,
-    padding: 17,
-    alignItems: 'center',
-    gap: 32,
     borderWidth: 1,
-    borderColor: tokens.colors.border,
+    borderColor: 'rgba(0, 0, 0, 0.1)',
+    padding: 17,
+    gap: 32,
+    alignItems: 'center',
   },
   statIconContainer: {
     width: 20,
     height: 20,
-    justifyContent: 'center',
     alignItems: 'center',
+    justifyContent: 'center',
   },
   statActiveIndicator: {
     width: 20,
     height: 20,
-    borderRadius: 10,
+    borderRadius: 999,
     backgroundColor: 'rgba(99, 102, 241, 0.2)',
-    justifyContent: 'center',
     alignItems: 'center',
+    justifyContent: 'center',
   },
   activeDot: {
     width: 8,
     height: 8,
-    borderRadius: 4,
-    backgroundColor: tokens.colors.primary,
+    borderRadius: 999,
+    backgroundColor: '#6366F1',
   },
   statValue: {
     fontSize: 24,
@@ -338,37 +314,24 @@ const styles = StyleSheet.create({
   },
   statLabel: {
     fontSize: 12,
-    color: tokens.colors.textSecondary,
+    fontWeight: '400',
+    color: '#717182',
     lineHeight: 16,
     textAlign: 'center',
   },
   interestsCard: {
-    backgroundColor: tokens.colors.card,
+    backgroundColor: '#FFFFFF',
     borderRadius: 14,
-    padding: 21,
-    marginBottom: 24,
     borderWidth: 1,
-    borderColor: tokens.colors.border,
-    gap: 36,
-  },
-  goalsCard: {
-    backgroundColor: tokens.colors.card,
-    borderRadius: 14,
+    borderColor: 'rgba(0, 0, 0, 0.1)',
     padding: 21,
-    marginBottom: 24,
-    borderWidth: 1,
-    borderColor: tokens.colors.border,
     gap: 36,
+    marginBottom: 24,
   },
   cardHeader: {
     flexDirection: 'row',
+    alignItems: 'center',
     justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  goalsHeaderLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
   },
   cardTitle: {
     fontSize: 16,
@@ -378,35 +341,51 @@ const styles = StyleSheet.create({
   },
   editButton: {
     fontSize: 14,
-    color: tokens.colors.primary,
     fontWeight: '400',
+    color: tokens.colors.primary,
     lineHeight: 20,
   },
   cardDescription: {
     fontSize: 14,
-    color: tokens.colors.textSecondary,
+    fontWeight: '400',
+    color: '#717182',
     lineHeight: 20,
   },
-  actionsCard: {
-    backgroundColor: tokens.colors.card,
+  goalsCard: {
+    backgroundColor: '#FFFFFF',
     borderRadius: 14,
-    padding: 21,
-    marginBottom: 24,
     borderWidth: 1,
-    borderColor: tokens.colors.border,
+    borderColor: 'rgba(0, 0, 0, 0.1)',
+    padding: 21,
     gap: 36,
+    marginBottom: 24,
+  },
+  goalsHeaderLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  actionsCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: 'rgba(0, 0, 0, 0.1)',
+    padding: 21,
+    gap: 36,
+    marginBottom: 24,
   },
   actionsContainer: {
     gap: 8,
   },
   actionButton: {
-    height: 36,
-    backgroundColor: tokens.colors.card,
+    backgroundColor: '#FFFFFF',
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: tokens.colors.border,
-    justifyContent: 'center',
+    borderColor: 'rgba(0, 0, 0, 0.1)',
+    paddingVertical: 8,
+    height: 36,
     alignItems: 'center',
+    justifyContent: 'center',
   },
   actionButtonText: {
     fontSize: 14,
@@ -415,6 +394,6 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
   bottomSpacer: {
-    height: 24,
+    height: 100,
   },
 });

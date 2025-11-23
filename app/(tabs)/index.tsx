@@ -109,8 +109,8 @@ export default function HomeScreen() {
           <View style={styles.topBar}>
             <View style={styles.greetingContainer}>
               <Text style={styles.greetingText}>
-                Oi{"\n"}
-                {user?.displayName || ""}
+                Olá, {"\n"}
+                {user?.displayName || "João"}!
               </Text>
             </View>
 
