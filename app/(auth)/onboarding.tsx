@@ -103,7 +103,7 @@ export default function OnboardingScreen() {
       goals,
     };
     console.log('User onboarding data:', userData);
-    router.replace('/(tabs)');
+    router.replace('/(auth)/post-signup-loading');
   };
 
   const canSelectMore = selectedInterests.length < MAX_INTERESTS;
