@@ -1,0 +1,1 @@
+export type LessonType = 'video' | 'reading' | 'quiz';
