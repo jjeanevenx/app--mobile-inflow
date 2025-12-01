@@ -1,10 +1,6 @@
-# Diagrama de Arquitetura - InFlow System
+# Fluxo de Dados Detalhado
 
-Este documento apresenta a arquitetura completa do sistema InFlow, incluindo o aplicativo mobile e o serviço backend.
-
-## Arquitetura Geral do Sistema
-
-```mermaid
+Este documento apresenta o fluxo completa do sistema InFlow, incluindo o aplicativo mobile e o serviço backend.
 graph TB
     subgraph "Mobile App (React Native + Expo)"
         APP[InFlow Mobile App]
@@ -111,7 +107,7 @@ graph TB
     class SCHED scheduler
 ```
 
-## Fluxo de Dados Detalhado
+
 
 ### 1. Criação de Usuário
 
@@ -334,8 +330,8 @@ sequenceDiagram
 
 ## Notas de Implementação
 
-1. **Região**: Cloud Functions configuradas para `southamerica-east1`
+1. **Região**: Cloud Functions configuradas para `us-central1`
 2. **Database**: Firestore usa database `db-content-curation`
-3. **Scheduler**: Executa a cada 12 horas no timezone `America/Sao_Paulo`
+3. **Scheduler**: Executa a cada 12 horas no timezone `us-central1`
 4. **GenAI**: Requer configuração de credenciais via `GOOGLE_APPLICATION_CREDENTIALS`
 

@@ -32,28 +32,3 @@ firebase deploy --only firestore:rules
 ```bash
 firebase deploy --only firestore
 ```
-
-## ⚠️ Para produção
-
-Antes de fazer deploy em produção, você deve atualizar as regras para serem mais restritivas, permitindo apenas:
-- Leitura dos dados do próprio usuário
-- Escrita apenas pelos Cloud Functions ou pelo próprio usuário em seus dados
-
-Exemplo de regras seguras:
-
-```javascript
-rules_version = '2';
-
-service cloud.firestore {
-  match /databases/{database}/documents {
-    // Usuários podem ler/escrever apenas seus próprios dados
-    match /usuarios/{userId} {
-      allow read, write: if request.auth != null && request.auth.uid == resource.data.uid;
-      allow create: if request.auth != null;
-    }
-    
-    // Outras coleções...
-  }
-}
-```
-
