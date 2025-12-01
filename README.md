@@ -1,50 +1,70 @@
-# Welcome to your Expo app 👋
+# Documentação do InFlow App
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Esta pasta contém a documentação técnica do aplicativo InFlow.
 
-## Get started
+## 📋 Índice
 
-1. Install dependencies
+### Diagramas de Sequência
+- **[Diagramas de Sequência](./sequence-diagrams.md)** - Diagramas detalhados dos principais fluxos do aplicativo
 
-   ```bash
-   npm install
-   ```
+## 🔄 Fluxos Documentados
 
-2. Start the app
+### Autenticação
+1. **Login** - Fluxo de autenticação de usuários existentes
+2. **Signup** - Fluxo de cadastro de novos usuários
+3. **Onboarding** - Processo de configuração inicial do perfil
+4. **Recuperação de Senha** - Fluxo de reset de senha
+5. **Logout** - Processo de saída do aplicativo
 
-   ```bash
-   npx expo start
-   ```
+### Navegação
+6. **Inicialização do App** - Fluxo de boot e verificação de autenticação
+7. **Navegação entre Telas** - Fluxo de navegação entre as principais telas
 
-In the output, you'll find options to open the app in a
+### Conteúdo
+8. **Visualização de Conteúdo** - Fluxo de visualização de vídeos e artigos
+9. **Trilhas de Aprendizado** - Navegação e progresso em trilhas educacionais
+10. **Atualização de XP e Nível** - Sistema de gamificação e progresso
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+## 📊 Formato dos Diagramas
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+Os diagramas estão em formato **Mermaid**, que pode ser visualizado em:
+- GitHub (renderização automática)
+- VS Code (com extensão Mermaid)
+- Editores online como [Mermaid Live Editor](https://mermaid.live)
 
-## Get a fresh project
+## 🛠️ Tecnologias Utilizadas
 
-When you're ready, run:
+- **React Native** - Framework mobile
+- **Expo Router** - Roteamento baseado em arquivos
+- **Firebase Auth** - Autenticação
+- **Firestore** - Banco de dados
+- **TypeScript** - Tipagem estática
 
-```bash
-npm run reset-project
+## 📝 Notas Importantes
+
+- Os diagramas mostram o estado atual da implementação
+- Algumas funcionalidades estão marcadas como TODO
+- Mocks são utilizados para dados de desenvolvimento
+- A integração completa com Firebase está em progresso
+
+## 🔍 Como Usar
+
+1. Abra o arquivo `sequence-diagrams.md`
+2. Use um visualizador Mermaid para ver os diagramas renderizados
+3. Cada diagrama mostra um fluxo específico do aplicativo
+4. As notas explicam decisões de design e implementação
+
+## 📚 Estrutura do Projeto
+
+```
+app/
+├── (auth)/          # Telas de autenticação
+├── (tabs)/          # Telas principais (tabs)
+└── (screens)/       # Telas de navegação
+src/
+├── services/        # Serviços (Auth, Firebase)
+├── hooks/           # Hooks customizados
+├── components/      # Componentes reutilizáveis
+└── mocks/           # Dados mockados
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
-
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.

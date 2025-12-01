@@ -1,10 +1,6 @@
 # Diagrama de Arquitetura - InFlow System
 
 Este documento apresenta a arquitetura completa do sistema InFlow, incluindo o aplicativo mobile e o serviço backend.
-
-## Arquitetura Geral do Sistema
-
-```mermaid
 graph TB
     subgraph "Mobile App (React Native + Expo)"
         APP[InFlow Mobile App]
