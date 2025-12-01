@@ -1,15 +1,17 @@
 import { FadeIn } from '@/src/components/animated';
 import { tokens } from '@/src/constants/tokens';
+import { useAuth } from '@/src/hooks/useAuth';
 import { useRouter } from 'expo-router';
 import {
   Edit2,
+  LogOut,
   Settings,
   Target,
   TrendingUp,
 } from 'lucide-react-native';
 import React from 'react';
 import {
-  Dimensions,
+  Alert,
   ScrollView,
   StatusBar,
   StyleSheet,
@@ -18,11 +20,47 @@ import {
   View,
 } from 'react-native';
 
-const { width } = Dimensions.get('window');
-const CARD_WIDTH = (width - 72) / 3; // (total width - paddings) / 3 cards
-
 export default function ProfileScreen() {
   const router = useRouter();
+  const { user, profile, signOut } = useAuth();
+  
+  // Obter nome e email do usuário
+  const userName = profile?.name || user?.displayName || 'Usuário';
+  const userEmail = profile?.email || user?.email || '';
+  
+  // Gerar iniciais do nome para o avatar
+  const getInitials = (name: string) => {
+    const parts = name.trim().split(' ');
+    if (parts.length >= 2) {
+      return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+    }
+    return name.substring(0, 2).toUpperCase();
+  };
+
+  const handleSignOut = () => {
+    Alert.alert(
+      'Sair',
+      'Tem certeza que deseja sair da sua conta?',
+      [
+        {
+          text: 'Cancelar',
+          style: 'cancel',
+        },
+        {
+          text: 'Sair',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await signOut();
+              router.replace('/(auth)/welcome');
+            } catch {
+              Alert.alert('Erro', 'Não foi possível sair. Tente novamente.');
+            }
+          },
+        },
+      ]
+    );
+  };
 
   return (
     <View style={styles.container}>
@@ -52,11 +90,11 @@ export default function ProfileScreen() {
             <View style={styles.profileInfo}>
               {/* Avatar com iniciais */}
               <View style={styles.avatar}>
-                <Text style={styles.avatarText}>JS</Text>
+                <Text style={styles.avatarText}>{getInitials(userName)}</Text>
               </View>
               <View style={styles.profileTextContainer}>
-                <Text style={styles.profileName}>João Silva</Text>
-                <Text style={styles.profileEmail}>joao.silva@gmail.com</Text>
+                <Text style={styles.profileName}>{userName}</Text>
+                <Text style={styles.profileEmail}>{userEmail}</Text>
               </View>
             </View>
 
@@ -116,9 +154,19 @@ export default function ProfileScreen() {
                 <Text style={styles.editButton}>Editar</Text>
               </TouchableOpacity>
             </View>
-            <Text style={styles.cardDescription}>
-              Adicione seus interesses para receber conteúdo personalizado
-            </Text>
+            {profile?.interests && profile.interests.length > 0 ? (
+              <View style={styles.interestsContainer}>
+                {profile.interests.map((interest, index) => (
+                  <View key={index} style={styles.interestChip}>
+                    <Text style={styles.interestChipText}>{interest}</Text>
+                  </View>
+                ))}
+              </View>
+            ) : (
+              <Text style={styles.cardDescription}>
+                Adicione seus interesses para receber conteúdo personalizado
+              </Text>
+            )}
           </View>
         </FadeIn>
 
@@ -130,13 +178,24 @@ export default function ProfileScreen() {
                 <Target size={20} color={tokens.colors.primary} />
                 <Text style={styles.cardTitle}>Minhas Metas</Text>
               </View>
-              <TouchableOpacity onPress={() => router.push('/(screens)/manage-goals')}>
-                <Text style={styles.editButton}>Gerenciar</Text>
+              <TouchableOpacity onPress={() => router.push('/(screens)/edit-goals')}>
+                <Text style={styles.editButton}>Editar</Text>
               </TouchableOpacity>
             </View>
-            <Text style={styles.cardDescription}>
-              Defina suas metas de aprendizado
-            </Text>
+            {profile?.goals && profile.goals.length > 0 ? (
+              <View style={styles.goalsListContainer}>
+                {profile.goals.map((goal, index) => (
+                  <View key={index} style={styles.goalItem}>
+                    <View style={styles.goalBullet} />
+                    <Text style={styles.goalText}>{goal}</Text>
+                  </View>
+                ))}
+              </View>
+            ) : (
+              <Text style={styles.cardDescription}>
+                Defina suas metas de aprendizado
+              </Text>
+            )}
           </View>
         </FadeIn>
 
@@ -145,13 +204,6 @@ export default function ProfileScreen() {
           <View style={styles.actionsCard}>
             <Text style={styles.cardTitle}>Ações Rápidas</Text>
             <View style={styles.actionsContainer}>
-              <TouchableOpacity
-                style={styles.actionButton}
-                onPress={() => router.push('/(screens)/progress')}
-                activeOpacity={0.8}
-              >
-                <Text style={styles.actionButtonText}>Ver Relatório Completo</Text>
-              </TouchableOpacity>
               <TouchableOpacity
                 style={styles.actionButton}
                 onPress={() => router.push('/(screens)/journey')}
@@ -168,6 +220,18 @@ export default function ProfileScreen() {
               </TouchableOpacity>
             </View>
           </View>
+        </FadeIn>
+
+        {/* Botão Sair */}
+        <FadeIn delay={400} duration={400}>
+          <TouchableOpacity
+            style={styles.signOutButton}
+            onPress={handleSignOut}
+            activeOpacity={0.8}
+          >
+            <LogOut size={20} color="#DC2626" />
+            <Text style={styles.signOutButtonText}>Sair</Text>
+          </TouchableOpacity>
         </FadeIn>
 
         <View style={styles.bottomSpacer} />
@@ -393,7 +457,67 @@ const styles = StyleSheet.create({
     color: tokens.colors.foreground,
     lineHeight: 20,
   },
+  signOutButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#DC2626',
+    paddingVertical: 12,
+    marginTop: 8,
+    marginBottom: 24,
+  },
+  signOutButtonText: {
+    fontSize: 14,
+    fontWeight: '400',
+    color: '#DC2626',
+    lineHeight: 20,
+  },
   bottomSpacer: {
     height: 100,
+  },
+  interestsContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginTop: 8,
+  },
+  interestChip: {
+    backgroundColor: 'rgba(99, 102, 241, 0.1)',
+    borderRadius: 999,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+  },
+  interestChipText: {
+    fontSize: 12,
+    fontWeight: '400',
+    color: tokens.colors.primary,
+    lineHeight: 16,
+  },
+  goalsListContainer: {
+    marginTop: 8,
+    gap: 12,
+  },
+  goalItem: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 12,
+  },
+  goalBullet: {
+    width: 6,
+    height: 6,
+    borderRadius: 999,
+    backgroundColor: tokens.colors.primary,
+    marginTop: 7,
+  },
+  goalText: {
+    flex: 1,
+    fontSize: 14,
+    fontWeight: '400',
+    color: tokens.colors.foreground,
+    lineHeight: 20,
   },
 });

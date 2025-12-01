@@ -10,8 +10,34 @@ const firebaseConfig = {
   projectId: Constants.expoConfig?.extra?.firebaseProjectId,
 };
 
+// Verificar se as configurações do Firebase estão presentes
+if (!firebaseConfig.apiKey || !firebaseConfig.authDomain || !firebaseConfig.projectId) {
+  console.warn('Firebase configuration is missing. Please check your environment variables.');
+  console.warn('Required: FIREBASE_API_KEY, FIREBASE_AUTH_DOMAIN, FIREBASE_PROJECT_ID');
+}
+
 // Iniciar Firebase
-export const app = initializeApp(firebaseConfig);
+let app;
+try {
+  app = initializeApp(firebaseConfig);
+  console.log('Firebase initialized successfully');
+} catch (error: any) {
+  console.error('Firebase initialization error:', error);
+  // Tentar com configuração mínima para não quebrar o app
+  try {
+    app = initializeApp({
+      apiKey: 'demo-api-key',
+      authDomain: 'demo-project.firebaseapp.com',
+      projectId: 'demo-project',
+    });
+    console.warn('Using fallback Firebase configuration');
+  } catch (fallbackError) {
+    console.error('Failed to initialize Firebase even with fallback config:', fallbackError);
+    throw fallbackError;
+  }
+}
+
+export { app };
 
 const DATABASE = 'db-content-curation';
 
@@ -28,13 +54,17 @@ try {
   auth = initializeAuth(app, {
      persistence: getReactNativePersistence(ReactNativeAsyncStorage),
   });
+  console.log('Firebase Auth initialized with AsyncStorage persistence');
 } catch (error: any) {
+  console.warn('Firebase Auth initialization error:', error);
   // Se já foi inicializado, usa getAuth
   if (error.code === 'auth/already-initialized') {
     auth = getAuth(app);
+    console.log('Firebase Auth already initialized, using getAuth');
   } else {
     // Fallback: usa getAuth que no React Native já tem persistência por padrão
     auth = getAuth(app);
+    console.log('Using fallback Firebase Auth (getAuth)');
   }
 }
 export { auth };

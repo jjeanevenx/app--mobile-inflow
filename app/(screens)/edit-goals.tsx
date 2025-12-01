@@ -1,9 +1,12 @@
 import { FadeIn } from '@/src/components/animated';
 import { tokens } from '@/src/constants/tokens';
+import { useAuth } from '@/src/hooks/useAuth';
+import { updateUserGoals } from '@/src/services/auth';
 import { useRouter } from 'expo-router';
 import { ChevronLeft, Plus, Target, Trash2 } from 'lucide-react-native';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
+    ActivityIndicator,
     Alert,
     ScrollView,
     StatusBar,
@@ -23,12 +26,24 @@ interface Goal {
 
 export default function ManageGoalsScreen() {
   const router = useRouter();
-  const [goals, setGoals] = useState<Goal[]>([
-    { id: '1', text: 'Completar 10 trilhas de aprendizado' },
-    { id: '2', text: 'Ler 3 artigos por semana' },
-    { id: '3', text: 'Alcançar nível 20' },
-  ]);
+  const { user, profile, refreshProfile } = useAuth();
+  const [goals, setGoals] = useState<Goal[]>([]);
   const [currentGoal, setCurrentGoal] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+
+  // Carregar metas do perfil
+  useEffect(() => {
+    if (profile?.goals && profile.goals.length > 0) {
+      // Converter array de strings para array de Goal
+      const goalsFromProfile: Goal[] = profile.goals.map((goal, index) => ({
+        id: `goal-${index}`,
+        text: goal,
+      }));
+      setGoals(goalsFromProfile);
+    }
+    setLoading(false);
+  }, [profile]);
 
   const addGoal = () => {
     if (currentGoal.trim()) {
@@ -61,12 +76,62 @@ export default function ManageGoalsScreen() {
     ]);
   };
 
-  const handleSave = () => {
-    // Aqui você salvaria no backend/AsyncStorage
-    Alert.alert('Sucesso', 'Metas atualizadas com sucesso!', [
-      { text: 'OK', onPress: () => router.back() },
-    ]);
+  const handleSave = async () => {
+    if (!user) {
+      Alert.alert('Erro', 'Usuário não autenticado');
+      return;
+    }
+
+    try {
+      setSaving(true);
+      // Converter array de Goal para array de strings
+      const goalsArray = goals.map(goal => goal.text);
+      console.log('[EditGoals] Saving goals:', goalsArray);
+      console.log('[EditGoals] User ID:', user.uid);
+      
+      const updatedProfile = await updateUserGoals(user.uid, goalsArray);
+      console.log('[EditGoals] Profile updated:', updatedProfile);
+      
+      await refreshProfile(); // Atualizar o perfil no contexto
+      
+      console.log('[EditGoals] Successfully saved goals');
+      Alert.alert('Sucesso', 'Metas atualizadas com sucesso!', [
+        { text: 'OK', onPress: () => router.back() },
+      ]);
+    } catch (error: any) {
+      console.error('[EditGoals] Error updating goals:', error);
+      console.error('[EditGoals] Error details:', {
+        code: error.code,
+        message: error.message,
+        stack: error.stack,
+      });
+      
+      let errorMessage = 'Não foi possível atualizar as metas. Tente novamente.';
+      if (error.message) {
+        errorMessage = error.message;
+      } else if (error.code === 'permission-denied') {
+        errorMessage = 'Permissão negada. Verifique as regras do Firestore.';
+      } else if (error.code === 'not-found') {
+        errorMessage = 'Perfil do usuário não encontrado.';
+      }
+      
+      Alert.alert('Erro', errorMessage);
+    } finally {
+      setSaving(false);
+    }
   };
+
+  if (loading) {
+    return (
+      <View style={styles.container}>
+        <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={tokens.colors.primary} />
+          <Text style={styles.loadingText}>Carregando...</Text>
+        </View>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -84,10 +149,15 @@ export default function ManageGoalsScreen() {
         <Text style={styles.headerTitle}>Minhas Metas</Text>
         <TouchableOpacity
           onPress={handleSave}
-          style={styles.saveButton}
+          style={[styles.saveButton, saving && styles.saveButtonDisabled]}
           activeOpacity={0.7}
+          disabled={saving}
         >
-          <Text style={styles.saveButtonText}>Salvar</Text>
+          {saving ? (
+            <ActivityIndicator size="small" color={tokens.colors.primary} />
+          ) : (
+            <Text style={styles.saveButtonText}>Salvar</Text>
+          )}
         </TouchableOpacity>
       </View>
 
@@ -330,5 +400,19 @@ const styles = StyleSheet.create({
   },
   bottomSpacer: {
     height: 32,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 16,
+  },
+  loadingText: {
+    fontSize: 14,
+    fontWeight: '400',
+    color: tokens.colors.mutedForeground,
+  },
+  saveButtonDisabled: {
+    opacity: 0.5,
   },
 });

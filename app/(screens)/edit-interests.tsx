@@ -1,9 +1,13 @@
 import { FadeIn } from '@/src/components/animated';
 import { tokens } from '@/src/constants/tokens';
+import { useAuth } from '@/src/hooks/useAuth';
+import { updateUserInterests } from '@/src/services/auth';
+import { PRESET_INTERESTS } from '@/src/constants/onboarding.data';
 import { useRouter } from 'expo-router';
 import { ChevronLeft, Plus, X } from 'lucide-react-native';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
+    ActivityIndicator,
     Alert,
     ScrollView,
     StatusBar,
@@ -14,31 +18,23 @@ import {
     View,
 } from 'react-native';
 
-const PRESET_INTERESTS = [
-  'Carreira',
-  'Tecnologia',
-  'Liderança',
-  'Inovação',
-  'Empreendedorismo',
-  'Marketing',
-  'Vendas',
-  'Finanças',
-  'Produtividade',
-  'Design',
-  'Negócios',
-  'Desenvolvimento Pessoal',
-];
-
 const MAX_INTERESTS = 5;
 
 export default function EditInterestsScreen() {
   const router = useRouter();
-  const [selectedInterests, setSelectedInterests] = useState<string[]>([
-    'Tecnologia',
-    'Liderança',
-    'Inovação',
-  ]);
+  const { user, profile, refreshProfile } = useAuth();
+  const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
   const [customInterest, setCustomInterest] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+
+  // Carregar interesses do perfil
+  useEffect(() => {
+    if (profile?.interests) {
+      setSelectedInterests(profile.interests);
+    }
+    setLoading(false);
+  }, [profile]);
 
   const toggleInterest = (interest: string) => {
     if (selectedInterests.includes(interest)) {
@@ -77,12 +73,60 @@ export default function EditInterestsScreen() {
     setSelectedInterests((prev) => prev.filter((i) => i !== interest));
   };
 
-  const handleSave = () => {
-    // Aqui você salvaria no backend/AsyncStorage
-    Alert.alert('Sucesso', 'Interesses atualizados com sucesso!', [
-      { text: 'OK', onPress: () => router.back() },
-    ]);
+  const handleSave = async () => {
+    if (!user) {
+      Alert.alert('Erro', 'Usuário não autenticado');
+      return;
+    }
+
+    try {
+      setSaving(true);
+      console.log('[EditInterests] Saving interests:', selectedInterests);
+      console.log('[EditInterests] User ID:', user.uid);
+      
+      const updatedProfile = await updateUserInterests(user.uid, selectedInterests);
+      console.log('[EditInterests] Profile updated:', updatedProfile);
+      
+      await refreshProfile(); // Atualizar o perfil no contexto
+      
+      console.log('[EditInterests] Successfully saved interests');
+      Alert.alert('Sucesso', 'Interesses atualizados com sucesso!', [
+        { text: 'OK', onPress: () => router.back() },
+      ]);
+    } catch (error: any) {
+      console.error('[EditInterests] Error updating interests:', error);
+      console.error('[EditInterests] Error details:', {
+        code: error.code,
+        message: error.message,
+        stack: error.stack,
+      });
+      
+      let errorMessage = 'Não foi possível atualizar os interesses. Tente novamente.';
+      if (error.message) {
+        errorMessage = error.message;
+      } else if (error.code === 'permission-denied') {
+        errorMessage = 'Permissão negada. Verifique as regras do Firestore.';
+      } else if (error.code === 'not-found') {
+        errorMessage = 'Perfil do usuário não encontrado.';
+      }
+      
+      Alert.alert('Erro', errorMessage);
+    } finally {
+      setSaving(false);
+    }
   };
+
+  if (loading) {
+    return (
+      <View style={styles.container}>
+        <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={tokens.colors.primary} />
+          <Text style={styles.loadingText}>Carregando...</Text>
+        </View>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -100,10 +144,15 @@ export default function EditInterestsScreen() {
         <Text style={styles.headerTitle}>Meus Interesses</Text>
         <TouchableOpacity
           onPress={handleSave}
-          style={styles.saveButton}
+          style={[styles.saveButton, saving && styles.saveButtonDisabled]}
           activeOpacity={0.7}
+          disabled={saving}
         >
-          <Text style={styles.saveButtonText}>Salvar</Text>
+          {saving ? (
+            <ActivityIndicator size="small" color={tokens.colors.primary} />
+          ) : (
+            <Text style={styles.saveButtonText}>Salvar</Text>
+          )}
         </TouchableOpacity>
       </View>
 
@@ -329,5 +378,19 @@ const styles = StyleSheet.create({
   },
   bottomSpacer: {
     height: 32,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 16,
+  },
+  loadingText: {
+    fontSize: 14,
+    fontWeight: '400',
+    color: tokens.colors.mutedForeground,
+  },
+  saveButtonDisabled: {
+    opacity: 0.5,
   },
 });

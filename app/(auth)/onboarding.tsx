@@ -17,12 +17,16 @@ import {
 import { EXPERIENCE_LEVELS, PRESET_INTERESTS } from '@/src/constants/onboarding.data';
 import { styles } from '@/src/styles/onboarding.styles';
 
+import { useAuth } from '@/src/hooks/useAuth';
+import { updateUserProfileWithOnboarding } from '@/src/services/auth';
+
 
 const MAX_INTERESTS = 5;
 const MAX_GOALS = 5;
 
 export default function OnboardingScreen() {
   const router = useRouter();
+  const { user } = useAuth();
   const [step, setStep] = useState(1); // 1: Profissão/Nível, 2: Interesses, 3: Metas
   
   // Step 1 - Profissão e Nível
@@ -94,16 +98,29 @@ export default function OnboardingScreen() {
     setGoals(prev => prev.filter(g => g !== goal));
   };
 
-  const handleFinish = () => {
-    // TODO: Save all data to Firebase
+  const handleFinish = async () => {
+    if (!user) {
+      console.error('User not authenticated');
+      return;
+    }
+
     const userData = {
+      name: user.displayName || '', // Usar o nome do Auth (definido durante signup)
       profession: profession.trim(),
       experienceLevel,
       interests: selectedInterests,
       goals,
     };
-    console.log('User onboarding data:', userData);
-    router.replace('/(auth)/post-signup-loading');
+    
+    // Salvar dados do onboarding no Firebase
+    try {
+      await updateUserProfileWithOnboarding(user.uid, userData);
+      router.replace('/(auth)/post-signup-loading');
+    } catch (error) {
+      console.error('Error saving onboarding data:', error);
+      // Continuar mesmo com erro para não bloquear o usuário
+      router.replace('/(auth)/post-signup-loading');
+    }
   };
 
   const canSelectMore = selectedInterests.length < MAX_INTERESTS;

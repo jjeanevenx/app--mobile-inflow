@@ -44,7 +44,7 @@ sequenceDiagram
     end
 ```
 
-## 2. Fluxo de Signup (Cadastro)
+## 2. Fluxo de Signup (Cadastro) com Cloud Function
 
 ```mermaid
 sequenceDiagram
@@ -53,6 +53,7 @@ sequenceDiagram
     participant Auth as useAuth Hook
     participant AS as AuthService
     participant FB as Firebase Auth
+    participant CF as Cloud Function<br/>newUserTrigger
     participant FS as Firestore
     participant OB as OnboardingScreen
 
@@ -78,12 +79,17 @@ sequenceDiagram
         else Cadastro bem-sucedido
             FB-->>AS: UserCredential
             AS->>FB: updateProfile({displayName: name})
-            AS->>FS: setDoc(userProfile)
-            Note over FS: Cria perfil com:<br/>level: 1, xp: 0,<br/>interests: [], goals: []
+            Note over FB,CF: Firebase Auth onCreate<br/>event disparado
+            FB->>CF: onUserCreate trigger
+            CF->>CF: Extrai uid, email, displayName
+            CF->>FS: addDocument(usuarios, {uid, email, name})
+            Note over FS: Cria documento básico:<br/>{uid, email, name}
+            FS-->>CF: Confirmação
+            CF->>CF: Log sucesso
             AS-->>Auth: {user}
             Auth->>Auth: onAuthStateChanged dispara
             Auth->>FS: getUserProfile(userId)
-            FS-->>Auth: UserProfile
+            FS-->>Auth: UserProfile básico
             Auth->>SS: Estado atualizado
             SS->>OB: router.replace('/(auth)/onboarding)')
             OB->>U: Exibe tela de onboarding
@@ -91,7 +97,7 @@ sequenceDiagram
     end
 ```
 
-## 3. Fluxo de Onboarding
+## 3. Fluxo de Onboarding com Cloud Functions
 
 ```mermaid
 sequenceDiagram
@@ -99,6 +105,9 @@ sequenceDiagram
     participant OB as OnboardingScreen
     participant PS as PostSignupLoading
     participant FS as Firestore
+    participant CF1 as Cloud Function<br/>userInterestTrigger
+    participant CF2 as Cloud Function<br/>userGoalsTrigger
+    participant AI as AI Services<br/>(GenAI)
     participant Tabs as (tabs)/index
 
     Note over U,Tabs: Passo 1: Profissão e Nível
@@ -125,14 +134,36 @@ sequenceDiagram
     OB->>PS: router.replace('/(auth)/post-signup-loading')
     
     Note over PS: Tela de Loading
-    PS->>PS: Anima ícone (3 steps)
+    PS->>PS: loading (3 steps)
     PS->>PS: Step 1: "Analisando perfil"
-    PS->>PS: Step 2: "Carregando conteúdos"
-    PS->>PS: Step 3: "Configurando jornada"
-    
-    Note over PS,FS: TODO: Salvar dados no Firebase
-    PS->>FS: updateUserProfile(profession, interests, goals)
+    PS->>FS: updateDoc(usuarios/{userId}, {profession, interests, goals})
     FS-->>PS: Confirmação
+    
+    Note over FS,CF1: Cloud Function: userInterestTrigger
+    FS->>CF1: onWrite trigger (interesses alterados)
+    CF1->>CF1: Detecta novos interesses
+    CF1->>AI: contentCurator(interesses)
+    AI->>AI: Gera conteúdos recomendados<br/>via GenAI
+    AI-->>CF1: curatedContent[]
+    CF1->>FS: addDocument(conteudos_recomendados, {userId, ...content})
+    FS-->>CF1: Confirmação
+    CF1->>CF1: Log sucesso
+    
+    PS->>PS: Step 2: "Carregando conteúdos"
+    
+    Note over FS,CF2: Cloud Function: userGoalsTrigger
+    FS->>CF2: onUpdate trigger (metas alteradas)
+    CF2->>CF2: Detecta metas adicionadas
+    CF2->>FS: getByIdAndField(conteudos_recomendados, {interest: goal})
+    FS-->>CF2: existingContent[]
+    CF2->>AI: learningPath(goal, existingContent)
+    AI->>AI: Gera trilhas de aprendizado<br/>via GenAI
+    AI-->>CF2: learningPaths[]
+    CF2->>FS: addDocument(trilhas, {userId, ...paths})
+    FS-->>CF2: Confirmação
+    CF2->>CF2: Log sucesso
+    
+    PS->>PS: Step 3: "Configurando jornada"
     
     PS->>Tabs: router.replace('/(tabs)')
     Tabs->>U: Exibe tela principal
@@ -375,7 +406,54 @@ sequenceDiagram
     end
 ```
 
-## 10. Fluxo de Logout
+## 10. Fluxo de Descoberta de Notícias Agendada
+
+```mermaid
+sequenceDiagram
+    participant Scheduler as Cloud Scheduler<br/>(a cada 12h)
+    participant CF as Cloud Function<br/>scheduledNewsTrigger
+    participant FS as Firestore
+    participant AI as AI Services<br/>(GenAI)
+    participant App as Mobile App
+
+    Note over Scheduler,App: Execução automática a cada 12 horas
+    
+    Scheduler->>CF: scheduledNewsDiscovery trigger
+    CF->>CF: Inicia descoberta de notícias
+    
+    CF->>FS: getUsersAtiveLastThirtyMins(usuarios)
+    FS-->>CF: usersSnapshot (usuários ativos)
+    
+    loop Para cada usuário ativo
+        CF->>CF: Verifica interesses do usuário
+        
+        alt Usuário tem interesses
+            CF->>AI: newsDiscovery(interesses)
+            AI->>AI: Busca e resume notícias<br/>relevantes via GenAI
+            AI-->>CF: newsItems[]
+            
+            alt Notícias encontradas
+                CF->>FS: addDocument(ultimas_noticias, {userId, newsItems})
+                FS-->>CF: Confirmação
+                CF->>CF: Log sucesso
+            else Nenhuma notícia
+                CF->>CF: Log: nenhuma notícia encontrada
+            end
+        else Sem interesses
+            CF->>CF: Log: usuário sem interesses, pulando
+        end
+    end
+    
+    CF->>CF: Log: descoberta concluída
+    CF-->>Scheduler: Sucesso
+    
+    Note over App: Usuário abre app
+    App->>FS: getNews(userId)
+    FS-->>App: ultimas_noticias (atualizadas)
+    App->>App: Exibe notícias na tela
+```
+
+## 11. Fluxo de Logout
 
 ```mermaid
 sequenceDiagram
@@ -427,9 +505,19 @@ sequenceDiagram
 
 5. **Mocks**: Atualmente, muitos dados são mockados (trilhas, conteúdos). A integração completa com Firebase está parcialmente implementada.
 
-6. **TODOs Identificados**:
-   - Salvar dados de onboarding no Firebase
+6. **Cloud Functions**:
+   - `newUserTrigger`: Disparada automaticamente quando um novo usuário é criado no Firebase Auth, criando perfil básico no Firestore
+   - `userInterestTrigger`: Disparada quando interesses do usuário são atualizados, gerando curadoria de conteúdo via IA
+   - `userGoalsTrigger`: Disparada quando metas do usuário são atualizadas, gerando trilhas de aprendizado via IA
+   - `scheduledNewsTrigger`: Executada a cada 12 horas, buscando notícias relevantes para usuários ativos
+
+7. **Integração Mobile-Backend**:
+   - O mobile app atualiza dados no Firestore
+   - Cloud Functions detectam mudanças e processam via IA
+   - Conteúdos gerados ficam disponíveis no Firestore para o app consumir
+
+8. **TODOs Identificados**:
    - Implementar sistema de quiz
    - Implementar tracking de progresso de trilhas
-   - Implementar sistema de recomendações baseado em interesses
+   - Melhorar sincronização em tempo real entre app e cloud functions
 

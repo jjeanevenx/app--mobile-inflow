@@ -1,28 +1,29 @@
 import "expo-env";
 import { ConfigContext, ExpoConfig } from "expo/config";
 
+
+
 export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
   name: "InFlow",
   slug: "app--mobile-inflow",
   version: "1.0.0",
   orientation: "portrait",
-  icon: "",
+  icon: "./src/assets/adaptive-icon.png",
   scheme: "inflow",
   userInterfaceStyle: "automatic",
   newArchEnabled: true,
 
   ios: {
-    supportsTablet: true,
+    supportsTablet: false,
   },
 
   android: {
-    adaptiveIcon: {
-      backgroundColor: "#E6F4FE",
-      foregroundImage: "",
-      backgroundImage: "",
-      monochromeImage: "",
-    },
+    icon: "./src/assets/adaptive-icon.png",
+    // adaptiveIcon: {
+    //   backgroundColor: "#E6F4FE",
+    //   foregroundImage: "./src/assets/adaptive-icon.png",
+    // },
     edgeToEdgeEnabled: true,
     predictiveBackGestureEnabled: false,
     package: "com.evapp.inflow",
@@ -30,7 +31,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
 
   web: {
     output: "static",
-    favicon: "",
+    favicon: "./src/assets/icon.png",
   },
 
   plugins: [
@@ -38,7 +39,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     [
       "expo-splash-screen",
       {
-        image: "",
+        image: "./src/assets/splash-icon-dark.png",
         imageWidth: 200,
         resizeMode: "contain",
         backgroundColor: "#ffffff",

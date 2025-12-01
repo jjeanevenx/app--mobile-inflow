@@ -5,7 +5,6 @@ import {
   Progress
 } from "@/src/components/ui";
 import { tokens } from "@/src/constants/tokens";
-import { useAuth } from "@/src/hooks/useAuth";
 import { Video } from "@/src/models/Video";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
@@ -38,6 +37,7 @@ import {
   FEATURED_CONTENT,
 } from "@/src/mocks/HomeScreen.mock";
 
+import { useAuth } from "@/src/hooks/useAuth";
 import { styles } from '@/src/styles/homeScreen.styles';
 
 
@@ -110,7 +110,7 @@ export default function HomeScreen() {
             <View style={styles.greetingContainer}>
               <Text style={styles.greetingText}>
                 Olá, {"\n"}
-                {user?.displayName || "João"}!
+                {user?.displayName}!
               </Text>
             </View>
 

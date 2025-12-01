@@ -1,7 +1,7 @@
 import { FadeIn } from '@/src/components/animated';
 import { Badge, Card, CardContent } from '@/src/components/ui';
 import { tokens } from '@/src/constants/tokens';
-import { Article } from '@/src/models/Article';
+import { ArticleReader } from '@/src/models/Article';
 import { styles } from '@/src/styles/article-reader.styles';
 import { extractDomain, isValidUrl } from '@/src/utils/media-utils';
 import * as Haptics from 'expo-haptics';
@@ -35,9 +35,9 @@ export default function ArticleReaderScreen() {
     timeAgo: params.timeAgo as string || '',
     category: params.category as string || '',
     image: params.image as string || '',
-    description: params.description as string || '',
-    articleUrl: params.articleUrl as string || ''
-  } as Article;
+    description: params.description as string || params.summary as string || '',
+    articleUrl: params.articleUrl as string || params.url || ''
+  } as ArticleReader;
 
   const [liked, setLiked] = useState<boolean | null>(null);
   const [completed, setCompleted] = useState(false);
